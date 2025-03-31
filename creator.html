@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Page</title>
+</head>
+<body>
+    <h2>Live Camera Feed</h2>
+    <img id="liveFeed" style="width: 100%; max-width: 600px;" />
+
+    <script>
+        let ws = new WebSocket("ws://localhost:8080");
+
+        ws.onmessage = (event) => {
+            let img = document.getElementById("liveFeed");
+            img.src = URL.createObjectURL(event.data);
+        };
+    </script>
+</body>
+</html>
